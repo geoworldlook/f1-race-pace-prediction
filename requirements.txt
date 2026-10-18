@@ -1,0 +1,10 @@
+fastf1
+numpy
+pandas
+tensorflow>=2.10
+keras-tuner
+shap
+scikit-learn
+joblib
+matplotlib
+seaborn

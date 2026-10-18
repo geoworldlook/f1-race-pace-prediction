@@ -1,61 +1,41 @@
-# F1 Race Pace Prediction Project
+# F1 race pace prediction
 
-## Overview
-This project focuses on predicting race pace for each Formula 1 driver based on practice and qualifying data. The goal is to provide a forecast of each driver's performance during the race, with continuous model updates as new race weekends unfold.
+Per-driver **LSTM models** that predict Formula 1 race lap times from practice and qualifying sessions.
+During the second half of the 2024 season, a prediction was published after each qualifying session and checked
+against the real race. Kept as an example of time-series deep learning outside geospatial data.
 
-## Project Structure and Workflow
-1. **Data Sources**: 
-   - The model uses data from **practice sessions (FP1, FP2, FP3)** and **qualifying sessions**. 
-   - Data is sourced using the `fastf1` Python library, which provides detailed information about each session.
-   - The dataset spans **2022 through 2024** and is updated after each race weekend.
+## Method
 
-2. **Model Training**:
-   - The model is trained on **practice and qualifying data**, with the **race data** serving as the target variable.
-   - After each weekend, new data is incorporated, and the model is retrained, ensuring that it remains up-to-date and reflects the latest trends in driver and team performance.
+- **Data:** practice (FP1–FP3) and qualifying lap times 2022–2024 per driver, collected with
+  [FastF1](https://github.com/theOehrly/Fast-F1). Race laps are the target.
+- **Model:** one LSTM network per driver. Hyperparameters (number of layers, units, dropout, learning rate,
+  sequence length) are tuned with `keras-tuner`, using Huber loss. SHAP is used to inspect feature importance.
+- **Post-processing:** outlier laps are replaced, and predicted lap times are smoothed with a simple Kalman filter.
+- **Evaluation:** after each race, prediction vs reality with MAE, RMSE, MAPE and R², plus plots for every driver.
 
-3. **Prediction and Reporting**:
-   - After the qualifying session each weekend, the model generates race pace predictions.
-   - The predictions are presented alongside a **qualitative description** of the weekend, accounting for variables not captured by raw data, such as penalties or changes to grid positions.
-   - After the race, **post-race analysis** is conducted, including a comparison between predicted and actual results, visualized through plots, and an **error calculation** to assess prediction accuracy.
+| File | Purpose |
+|---|---|
+| [`Model_F1.ipynb`](Model_F1.ipynb) | training and tuning of the per-driver models |
+| [`Prediction_code.ipynb`](Prediction_code.ipynb) | prediction template for a race weekend |
+| `prediction_GRAND_PRIX_*_2024.ipynb` | executed predictions and post-race checks: USA, Mexico, Brazil, Las Vegas, Qatar, Abu Dhabi |
 
-4. **Code Execution**:
-   - **Data collection and preprocessing** are handled locally. This includes cleaning and structuring race data for model input.
-   - The **model training and prediction** computations are performed in Google Colab, leveraging cloud resources for faster processing.
+## Run
 
-## Tools and Libraries
-- **Python**
-- **fastf1** for data extraction from F1 sessions
-- **Keras** and **TensorFlow** for building and training the machine learning model
-- **Matplotlib** and **Seaborn** for data visualization
-- **Colab** for cloud-based model training and predictions
+The notebooks run in Google Colab. Training data and saved models were kept on Google Drive and are not
+included in the repository, so the executed notebooks serve as the record of results.
 
-## Data Description
-- The project uses a comprehensive dataset for each F1 race weekend, including:
-  - **Practice session lap times**
-  - **Qualifying session lap times**
-  - **Race results** (target variable)
-  - Data is continually updated after each weekend.
+```bash
+pip install -r requirements.txt
+```
 
-## Usage
-To run this project locally, you will need to:
-1. Clone the repository.
-2. Install the necessary Python libraries by running:
+## Known limitations
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+- Each driver has a small dataset, so the models overfit easily. Race events (safety cars, penalties, strategy)
+  are outside the model and are only described qualitatively in each weekend summary.
+- The data-collection step was run locally and is not part of the repository.
 
-3. Run the data collection script to gather data from the latest F1 weekend:
+**Status:** 2024 season, not maintained.
 
-    ```bash
-    python collect_data.py
-    ```
+## License
 
-4. Use the Colab notebook to train the model and generate predictions.
-
-## Reporting and Visualization
-- After every race, a **visual report** will be generated, showing the model's predictions vs actual race results.
-- The report includes:
-  - Plots of predicted vs actual lap times for each driver.
-  - An error analysis showing the model's prediction accuracy.
-
+[MIT](LICENSE)
